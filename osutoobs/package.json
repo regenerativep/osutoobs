@@ -1,0 +1,15 @@
+{
+  "name": "osutoobs",
+  "version": "1.0.0",
+  "description": "creates a web server with information on the current osu application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Regen",
+  "license": "ISC",
+  "dependencies": {
+    "ps-node": "^0.1.6",
+    "socket.io": "^2.0.4"
+  }
+}
