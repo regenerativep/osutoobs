@@ -1,5 +1,70 @@
-const CP = require('child_process');
+"use strict"
+const CP = require("child_process");
+const HTTP = require("http");
+const URL = require("url");
+const FS = require("fs");
+const SocketIo = require("socket.io")(HTTP);
 
+var HttpServer = HTTP.createServer(function(req, res)
+{
+	var parsedUrl = URL.parse(req.url);
+	console.log(parsedUrl);
+	var actualFile = GetContent(parsedUrl.pathname);
+	FS.readFile(".\\" + actualFile, function(err, data)
+	{
+		if(err)
+		{
+			console.log("failed to read " + actualFile);
+			return;
+		}
+		res.writeHead(200, {"Content-Type": GetMimeType(actualFile)});
+		//res.write(data);
+		res.end(data, "utf8", function()
+		{
+			console.log("sent");
+		});
+	});
+});
+
+var GetContent = function(address)
+{
+	if(address.charAt(0) === "/")
+		address = address.substring(1);
+	var parts = address.split("/");
+	switch(parts[0])
+	{
+		case "index.html":
+			return "index.html";
+		case "favicon.ico":
+			return "favicon.ico";
+		case "socket.io.js":
+			return "socket.io.js";
+		case "socket.io.js.map":
+			return "socket.io.js.map";
+		case "socket.io.slim.js":
+			return "socket.io.slim.js";
+		case "socket.io.slim.js.map":
+			return "socket.io.slim.js.map";
+	}
+	return "404.html";
+};
+var GetMimeType = function(name)
+{
+	var ind = name.lastIndexOf(".");
+	if(ind < 0)
+		return "text/plain";
+	var ending = name.substring(ind);
+	switch(ending)
+	{
+		case ".html":
+			return "text/html";
+		case ".ico":
+			return "image/x-icon";
+		case ".map":
+			return "application/x-navimap";
+	}
+	return "text/plain";
+};
 
 var GetOsuTitle = function(cb)
 {
@@ -20,10 +85,18 @@ var GetOsuTitle = function(cb)
 	});
 };
 
-var tm = setInterval(function()
+HttpServer.listen(80);
+SocketIo.on("connection", function()
+{
+	console.log("ey");
+	socket.emit("news", { hello: "world" });
+});
+
+
+/*var tm = setInterval(function()
 {
 	GetOsuTitle(function(title)
 	{
-		console.log(title);
+		//console.log(title);
 	});
-}, 2000);
+}, 2000);*/
