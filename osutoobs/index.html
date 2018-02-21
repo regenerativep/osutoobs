@@ -2,14 +2,22 @@
 <html>
 	<head>
 		<title>osu stream panel</title>
-		<script src="socket.io.js"></script>
 		<script>
-			var socket = io.connect("http://localhost");
-			socket.on("news", function(data)
+		
+			var socket = new WebSocket("ws://127.0.0.1:5524");
+			socket.onopen = function(e)
 			{
-				console.log("hey");
-				console.log(data);
-			});
+				console.log("we're live");
+				socket.send("rawr");
+			};
+			socket.onclose = function(e)
+			{
+				console.log("we're off");
+			};
+			socket.onmessage = function(e)
+			{
+				console.log(e.data);
+			};
 		</script>
 	</head>
 	<body>

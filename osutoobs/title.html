@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body {
+			background-color: black;
+		}
+		.rolling {
+			height: 50px;
+			overflow: hidden;
+			position: relative;
+		}
+		.rolling p {
+			font-size: 1.5em;
+			font-family: Rockwell;
+			font-style: italic;
+			color: white;
+			position: absolute;
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			line-height: 50px;
+			text-align: left;
+			/* Starting position */
+			-moz-transform:translateX(100%);
+			-webkit-transform:translateX(100%);	
+			transform:translateX(100%);
+			/* Apply animation to this element */	
+			-moz-animation: rolling 15s ease infinite;
+			-webkit-animation: rolling 15s ease infinite;
+			animation: rolling 15s ease-in-out infinite;
+		}
+			/* Move it (define the animation) */
+		@-moz-keyframes rolling {
+			0%   { -moz-transform: translateX(100%); }
+			100% { -moz-transform: translateX(-100%); }
+		}
+		@-webkit-keyframes rolling {
+			0%   { -webkit-transform: translateX(100%); }
+			100% { -webkit-transform: translateX(-100%); }
+		}
+		@keyframes rolling {
+			0%   { 
+				-moz-transform: translateX(100%); /* Firefox bug fix */
+				-webkit-transform: translateX(100%); /* Firefox bug fix */
+				transform: translateX(800%); 		
+			}
+			30% {
+				transform: translateX(40%); 		
+			}
+			90% {
+				transform: translateX(10%); 		
+			}
+			100% { 
+				-moz-transform: translateX(-100%); /* Firefox bug fix */
+				-webkit-transform: translateX(-100%); /* Firefox bug fix */
+				transform: translateX(-100%); 
+			}
+		}
+	</style>
+	<script>
+		var socket, titleElement;
+		var attempt = 1;
+		var reconnect = function()
+		{
+			setTimeout(function()
+			{
+				try
+				{
+					titleElement.innerHTML = "attempting connection (attempt #" + attempt++ + ")";
+					if(typeof socket === "object")
+					{
+						try
+						{
+							socket.close();
+						}
+						catch(e)
+						{
+						}
+					}
+					socket = new WebSocket("ws://127.0.0.1:5525");
+					socket.onerror = function(e)
+					{
+						//reconnect();
+					};
+					socket.onopen = function(e)
+					{
+						attempt = 1;
+						console.log("connected");
+						titleElement.innerHTML = "connected";
+					};
+					socket.onclose = function(e)
+					{
+						if(attempt == 1)
+						{
+							console.log("disconnected");
+							titleElement.innerHTML = "disconnected";
+						}
+						reconnect();
+					};
+					socket.onmessage = function(e)
+					{
+						titleElement.innerHTML = e.data;
+					};
+				}
+				catch(e)
+				{
+					reconnect();
+				}
+			}, 2000);
+		};
+		var run = function()
+		{
+			titleElement = document.getElementById("titleText");
+			reconnect();
+		};
+		
+		window.addEventListener("load", run);
+	</script>
+</head>
+<body>
+	<div class="rolling">
+		<p id="titleText"></p>
+	</div>
+</body>
+</html>
